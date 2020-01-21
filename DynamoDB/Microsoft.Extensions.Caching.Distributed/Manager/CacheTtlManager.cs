@@ -4,20 +4,37 @@ using Microsoft.Extensions.Caching.Distributed.DynamoDb.Models;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class CacheTtlManager : ICacheTtlManager
     {
         private readonly long _ttl;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ttl"></param>
         public CacheTtlManager(long ttl)
         {
             _ttl = ttl;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
         public long ToUnixTime(DateTime date)
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64((date - epoch).TotalSeconds);
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public CacheOptions ToCacheOptions(DistributedCacheEntryOptions options)
         {
             if (options.AbsoluteExpiration != null)
@@ -54,6 +71,11 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
             };
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cacheOptions"></param>
+        /// <returns></returns>
         public long ToTtl(CacheOptions cacheOptions)
         {
             return ToUnixTime(DateTime.UtcNow.AddMinutes(cacheOptions.Span));

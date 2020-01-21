@@ -4,22 +4,15 @@ using Microsoft.Extensions.Caching.Distributed.DynamoDb.Constants;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class DistributedCacheDynamoDbSettings
     {
         /// <summary>
-        /// AWS Access key
-        /// </summary>
-        public string AccessKey { get; set; }
-
-        /// <summary>
-        /// AWS Secret
-        /// </summary>
-        public string AccessSecret { get; set; }
-
-        /// <summary>
         /// AWS Region
         /// </summary>
-        public RegionEndpoint ReginEndpoint { get; set; }
+        public RegionEndpoint RegionEndpoint { get; set; }
 
         /// <summary>
         /// Default time to live for cache items
@@ -39,17 +32,11 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
         /// <summary>
         /// Settings for Dynamo db cache provider
         /// </summary>
-        /// <param name="accessKey"></param>
-        /// <param name="accessSecret"></param>
         /// <param name="encoding"></param>
-        /// <param name="reginEndpoint"></param>
-        public DistributedCacheDynamoDbSettings(string accessKey, string accessSecret, Encoding encoding, RegionEndpoint reginEndpoint)
+        /// <param name="regionEndpoint"></param>
+        public DistributedCacheDynamoDbSettings(Encoding encoding, RegionEndpoint regionEndpoint)
         {
-            AccessKey = accessKey;
-
-            AccessSecret = accessSecret;
-
-            ReginEndpoint = reginEndpoint;
+            RegionEndpoint = regionEndpoint;
 
             Encoding = encoding;
 

@@ -1,5 +1,8 @@
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Constants
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class CacheTableAttributes
     {
         /// <summary>

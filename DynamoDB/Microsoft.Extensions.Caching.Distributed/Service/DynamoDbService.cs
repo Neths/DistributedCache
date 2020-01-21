@@ -6,15 +6,29 @@ using Microsoft.Extensions.Caching.Distributed.DynamoDb.Models;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class DynamoDbService : IDynamoDbService
     {   
         private readonly IAmazonDynamoDB _amazonDynamoDb;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="amazonDynamoDb"></param>
         public DynamoDbService(IAmazonDynamoDB amazonDynamoDb)
         {
             _amazonDynamoDb = amazonDynamoDb;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="readCapacityUnits"></param>
+        /// <param name="writeCapacityUnits"></param>
+        /// <returns></returns>
         public bool CreateDb(string tableName, int readCapacityUnits, int writeCapacityUnits)
         {
             try
@@ -85,6 +99,11 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <returns></returns>
         public bool DeleteDb(string databaseName)
         {
             var status = _amazonDynamoDb.DescribeTableAsync(databaseName).GetAwaiter().GetResult().Table.TableStatus;

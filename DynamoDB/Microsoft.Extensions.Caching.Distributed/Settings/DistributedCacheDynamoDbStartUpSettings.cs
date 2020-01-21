@@ -1,5 +1,8 @@
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class DistributedCacheDynamoDbStartUpSettings
     {
         /// <summary>
@@ -8,12 +11,12 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
         public bool CreateDbOnStartUp { get; set; }
 
         /// <summary>
-        /// Read capcity limit (Parallel)
+        /// Read capacity limit (Parallel)
         /// </summary>
         public int ReadCapacityUnits { get; set; }
 
         /// <summary>
-        /// Wrtie capcity limit (Parallel)
+        /// Write capacity limit (Parallel)
         /// </summary>
         public int WriteCapacityUnits { get; set; }
     }
