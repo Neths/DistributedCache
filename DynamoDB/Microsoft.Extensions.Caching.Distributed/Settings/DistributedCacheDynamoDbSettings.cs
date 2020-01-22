@@ -76,7 +76,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
             Encoding = Encoding.UTF8;
             DefaultTtl = CacheTableAttributes.Ttl;
 
-            var section = configuration.GetSection("Aws.DynamoDb:DistributedCaching");
+            var section = configuration.GetSection("Aws:DynamoDb:DistributedCaching");
             if (section.Exists())
             {
                 if (string.IsNullOrEmpty(section["region"]))
@@ -95,6 +95,12 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
                 {
                     DefaultTtl = long.Parse(section["ttl"]);
                     logger.LogDebug($"DefaultTtl are overidded by {section["ttl"]}");
+                }
+
+                if (string.IsNullOrEmpty(section["table_prefix"]))
+                {
+                    TablePrefix = section["table_prefix"];
+                    logger.LogDebug($"TablePrefix are set to {section["table_prefix"]}");
                 }
             }
 

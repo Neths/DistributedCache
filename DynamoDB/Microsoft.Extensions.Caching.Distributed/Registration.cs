@@ -55,15 +55,18 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb
 
             services.Add(new ServiceDescriptor(typeof(IDynamoDBContext), (c) => new DynamoDBContext(c.GetService<IAmazonDynamoDB>()), lifeTime));
 
-            services.Add(new ServiceDescriptor(typeof(IDynamoDbService), typeof(DynamoDbService), lifeTime));
+            services.Add(new ServiceDescriptor(typeof(IDynamoDbService), (c) => new DynamoDbService(c.GetService<IAmazonDynamoDB>()), lifeTime));
 
-            services.Add(new ServiceDescriptor(typeof(IStartUpManager), (c) => new StartUpManager(c.GetService<IDynamoDbService>(), c.GetService<IDistributedCacheDynamoDbSettings>()), lifeTime));
+            services.Add(new ServiceDescriptor(typeof(IStartUpManager), (c) => new StartUpManager(c.GetService<IDynamoDbService>(),
+                c.GetService<ILoggerFactory>().CreateLogger<StartUpManager>(),
+                c.GetService<IDistributedCacheDynamoDbSettings>())
+                , lifeTime));
 
             services.Add(new ServiceDescriptor(typeof(IDistributedCache),
-                (c) => new DistributedCacheService<T>(c.GetService<IDynamoDBContext>(), 
-                    c.GetService<ICacheTtlManager>(), 
-                    c.GetService<IStartUpManager>(), 
-                    c.GetService<IDistributedCacheDynamoDbSettings>(), 
+                (c) => new DistributedCacheService<T>(c.GetService<IDynamoDBContext>(),
+                    c.GetService<ICacheTtlManager>(),
+                    c.GetService<IStartUpManager>(),
+                    c.GetService<IDistributedCacheDynamoDbSettings>(),
                     c.GetService<ILoggerFactory>().CreateLogger<DistributedCacheService<T>>())
                 , lifeTime));
         }

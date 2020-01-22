@@ -3,6 +3,7 @@ using System.IO;
 using Amazon.DynamoDBv2;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype.Repository;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype
