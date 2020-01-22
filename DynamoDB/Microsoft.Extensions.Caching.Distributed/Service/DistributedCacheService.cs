@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Constants;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Models;
+using Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
 {
@@ -17,23 +18,37 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
     {   
         private readonly IDynamoDBContext _dynamoDbContext;
         private readonly ICacheTtlManager _cacheTtlManager;
-        private readonly Encoding _encoding;
+        private readonly IDistributedCacheDynamoDbSettings _settings;
+        private readonly ILogger<DistributedCacheService<T>> _logger;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="dynamoDbContext"></param>
         /// <param name="cacheTtlManager"></param>
         /// <param name="startUpManager"></param>
-        /// <param name="encoding"></param>
-        public DistributedCacheService(IDynamoDBContext dynamoDbContext, ICacheTtlManager cacheTtlManager, IStartUpManager startUpManager, Encoding encoding)
+        /// <param name="settings"></param>
+        /// <param name="logger"></param>
+        public DistributedCacheService(IDynamoDBContext dynamoDbContext, 
+            ICacheTtlManager cacheTtlManager, 
+            IStartUpManager startUpManager,
+            IDistributedCacheDynamoDbSettings settings,
+            ILogger<DistributedCacheService<T>> logger)
         {
             _dynamoDbContext = dynamoDbContext;
-
             _cacheTtlManager = cacheTtlManager;
+            _settings = settings;
+            _logger = logger;
 
-            _encoding = encoding;
-            
-            startUpManager.Run(typeof(T).Name);
+            var tableName = typeof(T).Name;
+
+            if (!string.IsNullOrEmpty(settings.TablePrefix))
+            {
+                tableName = $"{settings.TablePrefix}{tableName}";
+                _logger.LogDebug($"name of caching table are prefixed by {settings.TablePrefix}");
+            }
+
+            startUpManager.Run(tableName);
         }
 
         /// <summary>
@@ -50,7 +65,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
 
             if (cacheItem.Ttl >= _cacheTtlManager.ToUnixTime(DateTime.UtcNow))
             {
-                return _encoding.GetBytes(_dynamoDbContext.LoadAsync<T>(key).GetAwaiter().GetResult().Value);
+                return _settings.Encoding.GetBytes(_dynamoDbContext.LoadAsync<T>(key).GetAwaiter().GetResult().Value);
             }
                 
             Remove(cacheItem.CacheId);
@@ -94,7 +109,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
             var cacheItem = Activator.CreateInstance<T>();
 
             cacheItem.CacheId = key;
-            cacheItem.Value = _encoding.GetString(value);
+            cacheItem.Value = _settings.Encoding.GetString(value);
             cacheItem.CacheOptions = _cacheTtlManager.ToCacheOptions(options); 
             cacheItem.Ttl = _cacheTtlManager.ToTtl(cacheItem.CacheOptions);
 

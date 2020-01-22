@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Distributed.DynamoDb.Models;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Service;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb
 {
@@ -17,53 +18,54 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb
         /// 
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="settings"></param>
-        public static void RegisterDynamoDbCacheService(this IServiceCollection services, DistributedCacheDynamoDbSettings settings)
+        public static void RegisterDynamoDbCacheService(this IServiceCollection services)
         {
-            RegisterDynamoDbCacheService<DefaultCacheTable>(services, settings, ServiceLifetime.Scoped);
+            RegisterDynamoDbCacheService<DefaultCacheTable>(services, ServiceLifetime.Scoped);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="settings"></param>
         /// <typeparam name="T"></typeparam>
-        public static void RegisterDynamoDbCacheService<T>(this IServiceCollection services, DistributedCacheDynamoDbSettings settings) where T : ICacheTable
+        public static void RegisterDynamoDbCacheService<T>(this IServiceCollection services) where T : ICacheTable
         {
-            RegisterDynamoDbCacheService<T>(services, settings, ServiceLifetime.Scoped);
+            RegisterDynamoDbCacheService<T>(services, ServiceLifetime.Scoped);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="settings"></param>
         /// <param name="lifeTime"></param>
-        public static void RegisterDynamoDbCacheService(this IServiceCollection services, DistributedCacheDynamoDbSettings settings, ServiceLifetime lifeTime)
+        public static void RegisterDynamoDbCacheService(this IServiceCollection services, ServiceLifetime lifeTime)
         {
-            RegisterDynamoDbCacheService<DefaultCacheTable>(services, settings, lifeTime);
+            RegisterDynamoDbCacheService<DefaultCacheTable>(services, lifeTime);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="settings"></param>
         /// <param name="lifeTime"></param>
         /// <typeparam name="T"></typeparam>
-        public static void RegisterDynamoDbCacheService<T>(this IServiceCollection services, DistributedCacheDynamoDbSettings settings, ServiceLifetime lifeTime) where T : ICacheTable
+        public static void RegisterDynamoDbCacheService<T>(this IServiceCollection services, ServiceLifetime lifeTime) where T : ICacheTable
         {
-            services.Add(new ServiceDescriptor(typeof(ICacheTtlManager), (c) => new CacheTtlManager(settings.DefaultTtl), lifeTime));
+            services.Add(new ServiceDescriptor(typeof(ICacheTtlManager), (c) => new CacheTtlManager(c.GetService<IDistributedCacheDynamoDbSettings>()), lifeTime));
 
             services.Add(new ServiceDescriptor(typeof(IDynamoDBContext), (c) => new DynamoDBContext(c.GetService<IAmazonDynamoDB>()), lifeTime));
 
             services.Add(new ServiceDescriptor(typeof(IDynamoDbService), typeof(DynamoDbService), lifeTime));
 
-            services.Add(new ServiceDescriptor(typeof(IStartUpManager), (c) => new StartUpManager(c.GetService<IDynamoDbService>(), settings.StartUpSettings), lifeTime));
+            services.Add(new ServiceDescriptor(typeof(IStartUpManager), (c) => new StartUpManager(c.GetService<IDynamoDbService>(), c.GetService<IDistributedCacheDynamoDbSettings>()), lifeTime));
 
             services.Add(new ServiceDescriptor(typeof(IDistributedCache),
-                (c) => new DistributedCacheService<T>(c.GetService<IDynamoDBContext>(), c.GetService<ICacheTtlManager>(), c.GetService<IStartUpManager>(), settings.Encoding), lifeTime));
+                (c) => new DistributedCacheService<T>(c.GetService<IDynamoDBContext>(), 
+                    c.GetService<ICacheTtlManager>(), 
+                    c.GetService<IStartUpManager>(), 
+                    c.GetService<IDistributedCacheDynamoDbSettings>(), 
+                    c.GetService<ILoggerFactory>().CreateLogger<DistributedCacheService<T>>())
+                , lifeTime));
         }
     }
 }

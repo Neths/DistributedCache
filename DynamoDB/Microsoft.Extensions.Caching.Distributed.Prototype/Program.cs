@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text;
-using Amazon;
+using System.IO;
+using Amazon.DynamoDBv2;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype.Repository;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,21 +47,22 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype
 
         static void StartUp()
         {
-            //Set up the variables (Load from configuration files)
-            //Sensitive information can be stored in your deployment pipeline.
-            var accessKey = "";
-            var accessSecret = "";
-            var region = RegionEndpoint.GetBySystemName("eu-west-2");
-            var encoding = Encoding.GetEncoding("us-ascii");
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory))
+                .AddJsonFile("appsettings.json", optional: true)
+                .Build();
 
             //Set up the IOC
             IServiceCollection serviceCollection = new ServiceCollection();
 
+            serviceCollection.AddScoped<IDistributedCacheDynamoDbSettings, DistributedCacheDynamoDbSettings>();
+
             //Register caching
-            serviceCollection.RegisterDynomoDbCacheService<CustomCacheTable>(new DistributedCacheDynamoDbSettings(accessKey, accessSecret, encoding, region));
+            serviceCollection.RegisterDynamoDbCacheService<CustomCacheTable>();
 
             //Register repository
-            serviceCollection.Add(new ServiceDescriptor(typeof(ISampleRepository), typeof(SampleRepository), ServiceLifetime.Transient));
+            serviceCollection.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
+            serviceCollection.AddTransient<ISampleRepository, SampleRepository>();
 
             //Initialize the IOC
             _serviceProvider = serviceCollection.BuildServiceProvider();

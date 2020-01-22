@@ -1,14 +1,48 @@
 ﻿using System.Text;
 using Amazon;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Constants;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
 {
     /// <summary>
     /// 
     /// </summary>
-    public class DistributedCacheDynamoDbSettings
+    public interface IDistributedCacheDynamoDbSettings
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        string TablePrefix { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        RegionEndpoint RegionEndpoint { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        long DefaultTtl { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        Encoding Encoding { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        IDistributedCacheDynamoDbStartUpSettings StartUpSettings { get; }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DistributedCacheDynamoDbSettings : IDistributedCacheDynamoDbSettings
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string TablePrefix { get; set; }
+
         /// <summary>
         /// AWS Region
         /// </summary>
@@ -27,27 +61,44 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
         /// <summary>
         /// Start up settings
         /// </summary>
-        public DistributedCacheDynamoDbStartUpSettings StartUpSettings { get; set; }
+        public IDistributedCacheDynamoDbStartUpSettings StartUpSettings { get; set; }
 
         /// <summary>
         /// Settings for Dynamo db cache provider
         /// </summary>
-        /// <param name="encoding"></param>
-        /// <param name="regionEndpoint"></param>
-        public DistributedCacheDynamoDbSettings(Encoding encoding, RegionEndpoint regionEndpoint)
+        /// <param name="configuration"></param>
+        /// <param name="logger"></param>
+        /// <param name="distributedCacheDynamoDbStartUpSettings"></param>
+        public DistributedCacheDynamoDbSettings(IConfiguration configuration, 
+            ILogger<DistributedCacheDynamoDbSettings> logger,
+            IDistributedCacheDynamoDbStartUpSettings distributedCacheDynamoDbStartUpSettings)
         {
-            RegionEndpoint = regionEndpoint;
-
-            Encoding = encoding;
-
+            Encoding = Encoding.UTF8;
             DefaultTtl = CacheTableAttributes.Ttl;
 
-            StartUpSettings = new DistributedCacheDynamoDbStartUpSettings
+            var section = configuration.GetSection("Aws.DynamoDb:DistributedCaching");
+            if (section.Exists())
             {
-                ReadCapacityUnits = CacheTableAttributes.ReadCapacityUnits,
-                WriteCapacityUnits = CacheTableAttributes.WriteCapacityUnits,
-                CreateDbOnStartUp = CacheTableAttributes.CreateTableOnStartUp
-            };
+                if (string.IsNullOrEmpty(section["region"]))
+                {
+                    RegionEndpoint = RegionEndpoint.GetBySystemName(section["region"]);
+                    logger.LogDebug($"dynamoDb region are overidded by {section["region"]}");
+                }
+
+                if (string.IsNullOrEmpty(section["encoding"]))
+                {
+                    Encoding = Encoding.GetEncoding(section["encoding"]);
+                    logger.LogDebug($"encoding are overidded by {section["encoding"]}");
+                }
+
+                if (string.IsNullOrEmpty(section["ttl"]))
+                {
+                    DefaultTtl = long.Parse(section["ttl"]);
+                    logger.LogDebug($"DefaultTtl are overidded by {section["ttl"]}");
+                }
+            }
+
+            StartUpSettings = distributedCacheDynamoDbStartUpSettings;
         }
 
     }

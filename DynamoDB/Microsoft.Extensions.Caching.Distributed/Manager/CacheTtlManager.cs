@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Constants;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Models;
+using Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
 {
@@ -9,15 +10,14 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
     /// </summary>
     public class CacheTtlManager : ICacheTtlManager
     {
-        private readonly long _ttl;
+        private readonly IDistributedCacheDynamoDbSettings _settings;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="ttl"></param>
-        public CacheTtlManager(long ttl)
+        public CacheTtlManager(IDistributedCacheDynamoDbSettings settings)
         {
-            _ttl = ttl;
+            _settings = settings;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
             return new CacheOptions
             {
                 Type = CacheExpiryType.Absolute,
-                Span = (long)(DateTimeOffset.UtcNow.AddMinutes(_ttl).DateTime - DateTimeOffset.UtcNow.DateTime).TotalMinutes
+                Span = (long)(DateTimeOffset.UtcNow.AddMinutes(_settings.DefaultTtl).DateTime - DateTimeOffset.UtcNow.DateTime).TotalMinutes
             };
         }
 

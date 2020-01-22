@@ -9,16 +9,17 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
     public class StartUpManager: IStartUpManager
     {
         private readonly IDynamoDbService _dynamoDb;
-        private readonly DistributedCacheDynamoDbStartUpSettings _distributedCacheDynamoDbStartUpSettings;
+        private readonly IDistributedCacheDynamoDbSettings _distributedCacheDynamoDbSettings;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="dynamoDb"></param>
-        /// <param name="distributedCacheDynamoDbStartUpSettings"></param>
-        public StartUpManager(IDynamoDbService dynamoDb, DistributedCacheDynamoDbStartUpSettings distributedCacheDynamoDbStartUpSettings)
+        /// <param name="distributedCacheDynamoDbSettings"></param>
+        public StartUpManager(IDynamoDbService dynamoDb, IDistributedCacheDynamoDbSettings distributedCacheDynamoDbSettings)
         {
             _dynamoDb = dynamoDb;
-            _distributedCacheDynamoDbStartUpSettings = distributedCacheDynamoDbStartUpSettings;
+            _distributedCacheDynamoDbSettings = distributedCacheDynamoDbSettings;
         }
         /// <summary>
         /// 
@@ -26,9 +27,9 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Manager
         /// <param name="tableName"></param>
         public void Run(string tableName)
         {
-            if(_distributedCacheDynamoDbStartUpSettings != null && _distributedCacheDynamoDbStartUpSettings.CreateDbOnStartUp)
+            if(_distributedCacheDynamoDbSettings.StartUpSettings != null && _distributedCacheDynamoDbSettings.StartUpSettings.CreateDbOnStartUp)
             {
-                _dynamoDb.CreateDb(tableName, _distributedCacheDynamoDbStartUpSettings.ReadCapacityUnits, _distributedCacheDynamoDbStartUpSettings.WriteCapacityUnits);
+                _dynamoDb.CreateDb(tableName, _distributedCacheDynamoDbSettings.StartUpSettings.ReadCapacityUnits, _distributedCacheDynamoDbSettings.StartUpSettings.WriteCapacityUnits);
             }
         }
     }
