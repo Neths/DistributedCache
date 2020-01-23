@@ -9,33 +9,6 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
     /// <summary>
     /// 
     /// </summary>
-    public interface IDistributedCacheDynamoDbSettings
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        string TablePrefix { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        RegionEndpoint RegionEndpoint { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        long DefaultTtl { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        Encoding Encoding { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        IDistributedCacheDynamoDbStartUpSettings StartUpSettings { get; }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
     public class DistributedCacheDynamoDbSettings : IDistributedCacheDynamoDbSettings
     {
         /// <summary>
@@ -79,25 +52,25 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings
             var section = configuration.GetSection("Aws:DynamoDb:DistributedCaching");
             if (section.Exists())
             {
-                if (string.IsNullOrEmpty(section["region"]))
+                if (!string.IsNullOrEmpty(section["region"]))
                 {
                     RegionEndpoint = RegionEndpoint.GetBySystemName(section["region"]);
                     logger.LogDebug($"dynamoDb region are overidded by {section["region"]}");
                 }
 
-                if (string.IsNullOrEmpty(section["encoding"]))
+                if (!string.IsNullOrEmpty(section["encoding"]))
                 {
                     Encoding = Encoding.GetEncoding(section["encoding"]);
                     logger.LogDebug($"encoding are overidded by {section["encoding"]}");
                 }
 
-                if (string.IsNullOrEmpty(section["ttl"]))
+                if (!string.IsNullOrEmpty(section["ttl"]))
                 {
                     DefaultTtl = long.Parse(section["ttl"]);
                     logger.LogDebug($"DefaultTtl are overidded by {section["ttl"]}");
                 }
 
-                if (string.IsNullOrEmpty(section["table_prefix"]))
+                if (!string.IsNullOrEmpty(section["table_prefix"]))
                 {
                     TablePrefix = section["table_prefix"];
                     logger.LogDebug($"TablePrefix are set to {section["table_prefix"]}");

@@ -44,7 +44,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
                     var tableDescription = _amazonDynamoDb.CreateTableAsync(new CreateTableRequest
                     {
                         TableName = tableName,
-                        AttributeDefinitions = new List<AttributeDefinition>()
+                        AttributeDefinitions = new List<AttributeDefinition>
                         {
                             new AttributeDefinition
                             {

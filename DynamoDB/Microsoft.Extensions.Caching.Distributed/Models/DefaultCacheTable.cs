@@ -1,3 +1,5 @@
+using Amazon.DynamoDBv2.DataModel;
+
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Models
 {
     /// <summary>
@@ -9,12 +11,13 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Models
         /// <summary>
         /// 
         /// </summary>
+        [DynamoDBHashKey]
         public string CacheId { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string Value { get; set; }
+        public byte[] Value { get; set; }
 
         /// <summary>
         /// 

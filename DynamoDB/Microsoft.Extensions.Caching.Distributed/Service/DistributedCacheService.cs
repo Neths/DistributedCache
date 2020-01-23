@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
 
             if (cacheItem.Ttl >= _cacheTtlManager.ToUnixTime(DateTime.UtcNow))
             {
-                return _settings.Encoding.GetBytes(_dynamoDbContext.LoadAsync<T>(key).GetAwaiter().GetResult().Value);
+                return _dynamoDbContext.LoadAsync<T>(key).GetAwaiter().GetResult().Value;
             }
                 
             Remove(cacheItem.CacheId);
@@ -109,7 +109,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Service
             var cacheItem = Activator.CreateInstance<T>();
 
             cacheItem.CacheId = key;
-            cacheItem.Value = _settings.Encoding.GetString(value);
+            cacheItem.Value = value;
             cacheItem.CacheOptions = _cacheTtlManager.ToCacheOptions(options); 
             cacheItem.Ttl = _cacheTtlManager.ToTtl(cacheItem.CacheOptions);
 

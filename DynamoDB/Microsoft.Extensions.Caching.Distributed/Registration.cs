@@ -53,8 +53,6 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb
         {
             services.Add(new ServiceDescriptor(typeof(ICacheTtlManager), (c) => new CacheTtlManager(c.GetService<IDistributedCacheDynamoDbSettings>()), lifeTime));
 
-            services.Add(new ServiceDescriptor(typeof(IDynamoDBContext), (c) => new DynamoDBContext(c.GetService<IAmazonDynamoDB>()), lifeTime));
-
             services.Add(new ServiceDescriptor(typeof(IDynamoDbService), (c) => new DynamoDbService(c.GetService<IAmazonDynamoDB>()), lifeTime));
 
             services.Add(new ServiceDescriptor(typeof(IStartUpManager), (c) => new StartUpManager(c.GetService<IDynamoDbService>(),

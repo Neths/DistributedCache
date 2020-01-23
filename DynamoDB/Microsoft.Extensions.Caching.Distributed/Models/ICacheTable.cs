@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Models
         /// <summary>
         /// 
         /// </summary>
-        string Value { get; set; }
+        byte[] Value { get; set; }
 
         /// <summary>
         /// 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype.Repository;
 using Microsoft.Extensions.Caching.Distributed.DynamoDb.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype
 {
@@ -56,14 +57,20 @@ namespace Microsoft.Extensions.Caching.Distributed.DynamoDb.Prototype
             //Set up the IOC
             IServiceCollection serviceCollection = new ServiceCollection();
 
+            serviceCollection.AddLogging(cfg => cfg.AddConsole());
+
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
+
             serviceCollection.AddScoped<IDistributedCacheDynamoDbSettings, DistributedCacheDynamoDbSettings>();
+            serviceCollection.AddScoped<IDistributedCacheDynamoDbStartUpSettings, DistributedCacheDynamoDbStartUpSettings>();
+            serviceCollection.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
+            serviceCollection.AddTransient<ISampleRepository, SampleRepository>();
 
             //Register caching
             serviceCollection.RegisterDynamoDbCacheService<CustomCacheTable>();
 
             //Register repository
-            serviceCollection.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
-            serviceCollection.AddTransient<ISampleRepository, SampleRepository>();
+
 
             //Initialize the IOC
             _serviceProvider = serviceCollection.BuildServiceProvider();
